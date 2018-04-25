@@ -9,9 +9,11 @@ public class CharacterController : MonoBehaviour {
 	[SerializeField]
 	float moveSpeed = 4.0f;
 	[SerializeField]
-	float jumpForce = 4.0f;
+	float jumpForce = 100f;
+	bool isJump;
 	Vector3 forward, right;
 	Transform _transfrom;
+	Rigidbody rb;
 
 	/// <summary>
 	/// Awake is called when the script instance is being loaded.
@@ -19,6 +21,7 @@ public class CharacterController : MonoBehaviour {
 	void Awake()
 	{
 		_transfrom = transform;
+		rb = GetComponent<Rigidbody>();
 	}
 	
 	// Use this for initialization
@@ -34,7 +37,12 @@ public class CharacterController : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		if(Input.anyKey)
+
+		if(Input.GetButtonDown("Jump") && !isJump)
+		{
+			StartCoroutine(Jump());
+		}
+		else if(Input.anyKey)
 		{
 			Move();
 		}
@@ -51,5 +59,23 @@ public class CharacterController : MonoBehaviour {
 		_transfrom.forward = heading;
 		_transfrom.position += rightMovement;
 		_transfrom.position += upMovement;
+	}
+
+	IEnumerator Jump()
+	{
+		Debug.Log("Ciao!");
+		float originalYCharacter = _transfrom.position.y;
+		isJump = true;
+
+		rb.AddForce(Vector3.up *jumpForce, ForceMode.Impulse);
+
+		while(_transfrom.position.y > originalYCharacter)
+		{
+			yield return null;
+		}
+
+		isJump = false;
+
+		yield return null;
 	}
 }
