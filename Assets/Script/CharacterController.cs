@@ -7,12 +7,14 @@ public class CharacterController : MonoBehaviour {
 	public GameObject CameraObject;
 
 	[SerializeField]
-	float moveSpeed = 4.0f;
+	float moveSpeed = 2f;
 	[SerializeField]
-	float jumpForce = 100f;
+	float jumpForce = 4f;
+	[SerializeField]
+	Quaternion angleYCamera;
 	bool isJump;
 	Vector3 forward, right;
-	Transform _transfrom;
+	Transform _transfrom, Camera;
 	Rigidbody rb;
 
 	/// <summary>
@@ -27,7 +29,7 @@ public class CharacterController : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 
-		Transform Camera = CameraObject.transform.Find("Camera");
+		Camera = CameraObject.transform.Find("Camera");
 		forward = Camera.transform.forward;
 		forward.y = 0;
 		forward = Vector3.Normalize(forward);
@@ -38,6 +40,7 @@ public class CharacterController : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
+		angleYCamera = Camera.transform.rotation;
 		if(Input.GetButtonDown("Jump") && !isJump)
 		{
 			StartCoroutine(Jump());
@@ -46,19 +49,33 @@ public class CharacterController : MonoBehaviour {
 		{
 			Move();
 		}
+		if(Input.GetKeyDown(KeyCode.Q) || Input.GetKeyDown(KeyCode.E))
+		{
+			CameraAngleChange();
+		}
 	}
 
 	void Move()
 	{
 		Vector3 direction = new Vector3(Input.GetAxis("HorizontalKey"), 0 ,Input.GetAxis("VerticalKey"));
+
 		Vector3 rightMovement = right*moveSpeed*Time.deltaTime*Input.GetAxis("HorizontalKey");
 		Vector3 upMovement = forward*moveSpeed*Time.deltaTime*Input.GetAxis("VerticalKey");
+	
 
 		Vector3 heading = Vector3.Normalize(rightMovement + upMovement);
 
 		_transfrom.forward = heading;
 		_transfrom.position += rightMovement;
 		_transfrom.position += upMovement;
+	
+	}
+
+	void CameraAngleChange()
+	{
+
+		_transfrom.Rotate(new Vector3(30, 45,0), Space.Self);
+		
 	}
 
 	IEnumerator Jump()
@@ -69,13 +86,13 @@ public class CharacterController : MonoBehaviour {
 
 		rb.AddForce(Vector3.up *jumpForce, ForceMode.Impulse);
 
-		while(_transfrom.position.y > originalYCharacter)
+		while(_transfrom.position.y >= originalYCharacter )
 		{
 			yield return null;
 		}
 
 		isJump = false;
 
-		yield return null;
 	}
+
 }
